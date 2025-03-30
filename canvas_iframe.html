@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas Iframe</title>
+    <style>
+        canvas { border: 1px solid black; }
+    </style>
+</head>
+<body>
+    <canvas id="drawingCanvas" width="400" height="300"></canvas>
+    <button id="saveButton">Save Drawing</button>
+    <script>
+        // Your canvas.js code from before, but place it here.
+        const canvas = document.getElementById('drawingCanvas');
+        const context = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            context.beginPath();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            context.lineWidth = 2;
+            context.lineCap = 'round';
+            context.strokeStyle = 'black';
+            context.lineTo(e.offsetX, e.offsetY);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(e.offsetX, e.offsetY);
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+
+        const saveButton = document.getElementById("saveButton");
+
+        if(saveButton && canvas){
+            saveButton.addEventListener("click", function(){
+                const base64Data = canvas.toDataURL('image/png').replace(/^data:image\/(png|jpeg);base64,/, '');
+                if (window.parent && window.parent.Qualtrics && window.parent.Qualtrics.SurveyEngine) {
+                    window.parent.Qualtrics.SurveyEngine.setJSEmbeddedData('canvasImage', base64Data);
+                    console.log("Canvas data (base64) set to embedded data: canvasImage");
+                } else {
+                    console.log("Qualtrics not detected.");
+                }
+            });
+        } else {
+            console.error("Save button or canvas element not found.");
+        }
+
+    </script>
+</body>
+</html>
